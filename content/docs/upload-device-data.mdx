@@ -1,0 +1,192 @@
+---
+title: Upload Device Data
+description: Guide to uploading device data via API with examples and key requirements.
+---
+
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
+
+### Request Schema
+
+The API endpoint expects the following JSON payload in the request body:
+
+```json
+{
+  "value": <number | string | boolean>,  // The measurement reading (e.g. temperature, humidity)
+  "status": "<string>",                  // A status code or message (e.g. "OK", "ERROR")
+  "timestamp": <integer>                 // UNIX timestamp in seconds (e.g. 1752696307)
+}
+```
+
+> **Important:**  
+> The `timestamp` field **must** be a UNIX timestamp in **seconds**, not milliseconds.
+
+
+### URL Parameter Scheme
+
+The API requires two query parameters in the URL:
+
+| Parameter   | Type   | Description                 | Example                |
+|-------------|--------|-----------------------------|------------------------|
+| `org_id`    | string | The organization ID          | `v7pi4g3tYB8mu719ovIu` |
+| `sensor_id` | string | The unique sensor identifier | `BEaC9ZZDBntV9s3EnYQJ` |
+
+
+## Code Block
+
+<Tabs defaultValue="python" className="mb-4">
+  <TabsList>
+    <TabsTrigger value="python">Python</TabsTrigger>
+    <TabsTrigger value="go">Go</TabsTrigger>
+    <TabsTrigger value="rust">Rust</TabsTrigger>
+    <TabsTrigger value="nodejs">Node.js</TabsTrigger>
+  </TabsList>
+
+  <TabsContent value="python">
+    ```python
+    import requests
+    import json
+
+    url = "https://iot.api.salkaro.com/v1/upload?org_id={org_id}&sensor_id={sensor_id}"
+
+    payload = json.dumps({
+      "value": 28,
+      "status": "OK",
+      "timestamp": 1752696307
+    })
+    headers = {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer API_KEY"
+    }
+
+    response = requests.post(url, headers=headers, data=payload)
+    print(response.text)
+    ```
+  </TabsContent>
+
+  <TabsContent value="go">
+    ```go
+    package main
+
+    import (
+      "bytes"
+      "encoding/json"
+      "fmt"
+      "net/http"
+    )
+
+    type Payload struct {
+      Value     int    `json:"value"`
+      Status    string `json:"status"`
+      Timestamp int64  `json:"timestamp"`
+    }
+
+    func main() {
+      url := "https://iot.api.salkaro.com/v1/upload?org_id={org_id}&sensor_id={sensor_id}"
+      apiKey := "API_KEY"
+
+      payload := Payload{
+        Value:     28,
+        Status:    "OK",
+        Timestamp: 1752696307,
+      }
+      body, err := json.Marshal(payload)
+      if err != nil {
+        panic(err)
+      }
+
+      req, err := http.NewRequest("POST", url, bytes.NewBuffer(body))
+      if err != nil {
+        panic(err)
+      }
+      req.Header.Set("Content-Type", "application/json")
+      req.Header.Set("Authorization", "Bearer "+apiKey)
+
+      client := &http.Client{}
+      resp, err := client.Do(req)
+      if err != nil {
+        panic(err)
+      }
+      defer resp.Body.Close()
+
+      fmt.Println("Status Code:", resp.StatusCode)
+    }
+    ```
+  </TabsContent>
+
+  <TabsContent value="rust">
+    ```rust
+    use reqwest::blocking::Client;
+    use serde::Serialize;
+
+    #[derive(Serialize)]
+    struct Payload {
+        value: i32,
+        status: String,
+        timestamp: i64,
+    }
+
+    fn main() -> Result<(), Box<dyn std::error::Error>> {
+        let url = "https://iot.api.salkaro.com/v1/upload?org_id={org_id}&sensor_id={sensor_id}";
+        let api_key = "API_KEY";
+
+        let payload = Payload {
+            value: 28,
+            status: "OK".to_string(),
+            timestamp: 1752696307,
+        };
+
+        let client = Client::new();
+        let resp = client
+            .post(url)
+            .bearer_auth(api_key)
+            .json(&payload)
+            .send()?;
+
+        println!("Status: {}", resp.status());
+        Ok(())
+    }
+    ```
+  </TabsContent>
+
+  <TabsContent value="nodejs">
+    ```js
+    import fetch from "node-fetch";
+
+    const url = "https://iot.api.salkaro.com/v1/upload?org_id={org_id}&sensor_id={sensor_id}";
+    const apiKey = "API_KEY";
+
+    const payload = {
+      value: 28,
+      status: "OK",
+      timestamp: 1752696307,
+    };
+
+    fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify(payload),
+    })
+      .then((res) => res.json())
+      .then((data) => console.log("Response:", data))
+      .catch((err) => console.error("Error:", err));
+    ```
+  </TabsContent>
+</Tabs>
+
+## Responses
+
+The API may return the following:
+
+| HTTP Status Code         | Response Body                    | Description                                          |
+| ------------------------ | -------------------------------- | ---------------------------------------------------- |
+| `202 Accepted`           | `{ "status": "accepted" }`       | Data was successfully ingested.                      |
+| `400 Bad Request`        | *plain text*                     | Malformed JSON, missing fields, or invalid values.   |
+| `401 Unauthorized`       | *plain text*                     | Missing or invalid `Authorization` header or API key.|
+| `402 Payment Required`   | *plain text*                     | Quota exceeded for the requested retention tier.     |
+| `405 Method Not Allowed` | *plain text*                     | HTTP method other than `POST` was used.              |
+| `429 Too Many Requests`  | *plain text*                     | Rate limit exceeded for this `(apiKey, sensorId)` pair. |
+| `500 Internal Server Error` | *plain text*                 | Server‑side error (e.g., database write failure).    |
+

@@ -1,0 +1,32 @@
+---
+title: Rate Limits
+description: How to handle rate limiting on the Upload API
+---
+
+## Overview
+
+To ensure fair use of our ingestion API and protect overall system stability, each API key is subject to rate limits. If you exceed your allotted rate, you will receive an HTTP 429 (Too Many Requests) response.  
+
+Below is a summary of the limits applied per `(apiKey, sensorId)` pair, based on your retention tier:
+
+## Limits by Retention Tier
+
+| Retention Tier | API Key Suffix | Max Writes per Second | Burst Capacity |
+| -------------- | -------------- | --------------------- | -------------- |
+| 7‑Day (0007)   | `…0007`        | 2 writes/sec          | 2              |
+| 30‑Day (0030)  | `…0030`        | 2 writes/sec          | 2              |
+| 90‑Day (0090)  | `…0090`        | 2 writes/sec          | 2              |
+| 180‑Day (0180) | `…0180`        | 2 writes/sec          | 2              |
+| 365‑Day (0365) | `…0365`        | 2 writes/sec          | 2              |
+
+> **Note:** Burst capacity means you can send up to 2 writes in a single second, but sustained throughput is limited to 2 writes per second over time.
+
+## HTTP 429 Response
+
+When you exceed your limit, the API will return:
+
+```http
+HTTP/1.1 429 Too Many Requests
+Content-Type: text/plain
+
+Rate limit exceeded
