@@ -46,7 +46,7 @@ The API requires two query parameters in the URL:
     import requests
     import json
 
-    url = "https://iot.api.salkaro.com/v1/upload?org_id={org_id}&sensor_id={sensor_id}"
+    url = "https://iotapi.salkaro.com/v1/upload?org_id={org_id}&sensor_id={sensor_id}"
 
     payload = json.dumps({
       "value": 28,
@@ -81,7 +81,7 @@ The API requires two query parameters in the URL:
     }
 
     func main() {
-      url := "https://iot.api.salkaro.com/v1/upload?org_id={org_id}&sensor_id={sensor_id}"
+      url := "https://iotapi.salkaro.com/v1/upload?org_id={org_id}&sensor_id={sensor_id}"
       apiKey := "API_KEY"
 
       payload := Payload{
@@ -126,7 +126,7 @@ The API requires two query parameters in the URL:
     }
 
     fn main() -> Result<(), Box<dyn std::error::Error>> {
-        let url = "https://iot.api.salkaro.com/v1/upload?org_id={org_id}&sensor_id={sensor_id}";
+        let url = "https://iotapi.salkaro.com/v1/upload?org_id={org_id}&sensor_id={sensor_id}";
         let api_key = "API_KEY";
 
         let payload = Payload {
@@ -152,7 +152,7 @@ The API requires two query parameters in the URL:
     ```js
     import fetch from "node-fetch";
 
-    const url = "https://iot.api.salkaro.com/v1/upload?org_id={org_id}&sensor_id={sensor_id}";
+    const url = "https://iotapi.salkaro.com/v1/upload?org_id={org_id}&sensor_id={sensor_id}";
     const apiKey = "API_KEY";
 
     const payload = {
